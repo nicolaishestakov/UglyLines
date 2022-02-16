@@ -58,6 +58,26 @@ namespace UglyLines.Desktop.ViewModels
                 {
                     Game.StartMakingMove(x, y);
                 }
+                else if (Game.IsWithinField(x, y) && Game.Field[x, y] != null)
+                {
+                    //select another ball
+                    try
+                    {
+                        var selectedBall = Game.SelectedBall;
+                        
+                        var ball = Game.SelectBall(x, y); //todo duplicate code
+                        (ball as Ellipse).Stroke = new SolidColorBrush(Color.Parse("Black"));
+                        (ball as Ellipse).StrokeThickness = 4;
+
+                        if (selectedBall != null && selectedBall != Game.SelectedBall)
+                        {
+                            (selectedBall as Ellipse).StrokeThickness = 0;
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
             }
         }
     }
