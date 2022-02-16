@@ -38,10 +38,17 @@ public class Game
         {
             return false;
         }
+
+        if (!SelectedBallCell.HasValue)
+        {
+            return false;
+        }
         
-        //todo check if path is possible
-        return true;
+        var pathfinder = Pathfinder.Create(_field, (shape) => shape != null);
+
+        return pathfinder.CanMove(SelectedBallCell.Value, (x, y));
     }
+    
     
     
     
