@@ -17,11 +17,11 @@ namespace UglyLines.Desktop.ViewModels
                 LeftMargin = 30,
                 TopMargin = 80,
                 CellSize = 40,
-                Width = 10,
-                Height = 10
+                Width = 9, //todo DRY
+                Height = 9
 
             },
-            10, 10);
+            9, 9); //todo DRY
 
         public void StartGame()
         {
@@ -30,11 +30,11 @@ namespace UglyLines.Desktop.ViewModels
                     LeftMargin = 30,
                     TopMargin = 80,
                     CellSize = 40,
-                    Width = 10,
-                    Height = 10
+                    Width = 9, //todo DRY
+                    Height = 9
 
                 },
-                10, 10);
+                9, 9); //todo DRY
         }
         
         public void FieldCellClick(int x, int y)

@@ -36,8 +36,8 @@ namespace UglyLines.Desktop.Views
             LeftMargin = 30,
             TopMargin = 80,
             CellSize = 40,
-            Width = 10,
-            Height = 10
+            Width = 9,
+            Height = 9  //todo DRY
         };
 
         private Canvas _fieldCanvas;
@@ -92,18 +92,6 @@ namespace UglyLines.Desktop.Views
 
                 _fieldCanvas.Children.Add(line);
             }
-            
-            
-            //test draw balls
-            // var b1 = DrawBall(0, 0, Color.Parse("Red"));
-            // var b2 = DrawBall(5, 2, Color.Parse("Green"));
-            //
-            // Canvas.SetLeft(b1, _fieldSettings.FieldToCanvasX(6));
-            //
-            // if (b1 is Ellipse e)
-            // {
-            //     e.Height *= 0.6;
-            // }
         }
 
 
