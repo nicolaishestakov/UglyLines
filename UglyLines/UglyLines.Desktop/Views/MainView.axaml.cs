@@ -151,10 +151,9 @@ namespace UglyLines.Desktop.Views
 
             if (game.State == GameState.ClearLines)
             {
-                var b1 = DrawBall(0, 0, Color.Parse("Red"));
-                var b2 = DrawBall(0, 0, Color.Parse("Green"));
-                var b3 = DrawBall(0, 0, Color.Parse("Blue"));
-                //todo generate random color balls
+                var b1 = DrawBall(0, 0, game.GetNextBallColor());
+                var b2 = DrawBall(0, 0, game.GetNextBallColor());
+                var b3 = DrawBall(0, 0, game.GetNextBallColor());
 
                 var shapesToRemove = game.BallsToClear.Select(b => game.Field[b.x, b.y]).ToList();
                 
@@ -194,9 +193,9 @@ namespace UglyLines.Desktop.Views
 
             var game = MainViewModel.Game;
 
-            var b1 = DrawBall(0, 0, Color.Parse("Red"));
-            var b2 = DrawBall(0, 0, Color.Parse("Green"));
-            var b3 = DrawBall(0, 0, Color.Parse("Blue"));
+            var b1 = DrawBall(0, 0, game.GetNextBallColor()); //todo DRY
+            var b2 = DrawBall(0, 0, game.GetNextBallColor());
+            var b3 = DrawBall(0, 0, game.GetNextBallColor());
 
             game.ClearLinesAndShootNewBalls(new[] { b1, b2, b3 });
             game.ApplyNewBallsAndProceedToNewMoveOrEndGame();

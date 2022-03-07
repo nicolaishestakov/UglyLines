@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using UglyLines.Desktop.Views;
@@ -212,6 +213,70 @@ public class Game
         return true;
     }
 
+    private Color? GetCellBallColor(int x, int y)
+    {
+        if (!IsWithinField(x, y))
+        {
+            return null;
+        }
+        
+        var brush = _field[x, y]?.Fill as SolidColorBrush;
+
+        return brush?.Color;
+    }
+    
+    private (int x, int y) GetLineEndCellInDirection((int x, int y) startCell, int dx, int dy, Color color)
+    {
+        var nextX = startCell.x + dx;
+        var nextY = startCell.y + dy;
+
+        while (GetCellBallColor(nextX, nextY) == color)
+        {
+            nextX += dx;
+            nextY += dy;
+        }
+        
+        // nextX, nextY points to the first cell that does not fit
+        // return previous cell
+
+        return (nextX - dx, nextY - dy);
+    }
+   
+    
+    private List<(int x, int y)> GetCompleteLineBallsInDirection((int x, int y) startCell, int dx, int dy, Color color)
+    {
+        var lineEnd1 = GetLineEndCellInDirection(startCell, dx, dy, color);
+        var lineEnd2 = GetLineEndCellInDirection(startCell, -dx, -dy, color);
+
+        var xLen = Math.Abs(lineEnd1.x - lineEnd2.x) + 1;
+        var yLen = Math.Abs(lineEnd1.y - lineEnd2.y) + 1;
+
+        var lineLength = Math.Max(xLen, yLen);
+
+        var result = new List<(int x, int y)>();
+
+        if (lineLength >= 5)
+        {
+            //complete line
+            var cell = lineEnd1;
+
+            do
+            {
+                result.Add(cell);
+                cell = (cell.x - dx, cell.y - dy);
+
+                if (!IsWithinField(cell.x, cell.y))
+                {
+                    throw new Exception("Logical error while processing lines");
+                }
+            } while (cell != lineEnd2);
+            
+            result.Add(cell); //this is lineEnd2
+        }
+
+        return result;
+    }
+    
     private List<(int x, int y)> CheckBallsToClear(int x, int y, Shape ballToSet)
     {
         var ballBrush = ballToSet.Fill as SolidColorBrush;
@@ -225,47 +290,36 @@ public class Game
         var color = ballBrush.Color;
      
         // check horizontal line
-        var leftPos = x;
-        var rightPos = x;
+        result.AddRange(GetCompleteLineBallsInDirection((x, y), 1, 0, color));
         
-        for (var xCheck = x-1; xCheck >= 0; xCheck--)
-        {
-            var brush = _field[xCheck, y]?.Fill as SolidColorBrush;
-
-            if (brush == null || brush.Color != color)
-            {
-                break;
-            }
-            leftPos = xCheck;
-        }
+        // check vertical line
+        result.AddRange(GetCompleteLineBallsInDirection((x, y), 0, 1, color));
         
-        for (var xCheck = x+1; xCheck < FieldSettings.Width; xCheck++)
-        {
-            var brush = _field[xCheck, y]?.Fill as SolidColorBrush;
-
-            if (brush == null || brush.Color != color)
-            {
-                break;
-            }
-            rightPos = xCheck;
-        }
-
-        if (rightPos - leftPos >= 4)
-        {
-            for (var xPos = leftPos; xPos <= rightPos; xPos++)
-            {
-                var ball = _field[xPos, y];
-                if (ball != null) result.Add((xPos, y));
-            }
-        }
+        // check diagonal right-down line
+        result.AddRange(GetCompleteLineBallsInDirection((x, y), 1, 1, color));
         
-        //todo check vertical
-        
-        //todo check diagonal tl->br
-        
-        //todo check diagonal bl->tr
+        // check diagonal right-up line
+        result.AddRange(GetCompleteLineBallsInDirection((x, y), 1, -1, color));
 
         return result;
     }
+
+    private static readonly Color[] _ballColors = new[]
+    {
+        Color.Parse("Red"),
+        Color.Parse("Green"),
+        Color.Parse("Blue"),
+        Color.Parse("Yellow"),
+        Color.Parse("Pink"),
+        Color.Parse("LightBlue"),
+        Color.Parse("Brown")
+    };
     
+    public Color GetNextBallColor()
+    {
+        var random = new Random();
+        var colorIndex = random.Next(_ballColors.GetLowerBound(0), _ballColors.GetUpperBound(0) + 1);
+
+        return _ballColors[colorIndex];
+    }
 }
