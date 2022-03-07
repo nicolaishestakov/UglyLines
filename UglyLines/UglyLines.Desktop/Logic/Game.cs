@@ -134,15 +134,24 @@ public class Game
         return true;
     }
 
-    public bool ClearLinesAndShootNewBalls(IEnumerable<Shape> newBalls)
+    public bool ClearLinesAndPrepareNewBallsToShoot(IEnumerable<Shape> newBalls)
     {
         foreach (var ballXY in BallsToClear)
         {
             _field[ballXY.x, ballXY.y] = null;
         }
+
+        bool linesDeleted = _ballsToClear.Any(); 
         
         _ballsToClear.Clear();
 
+        if (linesDeleted)
+        {
+            // when there are lines completed, new balls are not thrown
+            State = GameState.WaitingForSelection;
+            return true;
+        }
+        
         var emptyCells = new List<(int x, int y)>();
 
         for (var x = 0; x < FieldSettings.Width; x++)
@@ -181,6 +190,11 @@ public class Game
 
     public bool ApplyNewBallsAndProceedToNewMoveOrEndGame()
     {
+        if (State != GameState.ShootNewBalls)
+        {
+            return true;
+        }
+        
         foreach (var newBall in BallsToShoot)
         {
             _field[newBall.x, newBall.y] = newBall.ball;

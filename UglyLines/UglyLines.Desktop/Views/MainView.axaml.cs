@@ -151,14 +151,40 @@ namespace UglyLines.Desktop.Views
 
             if (game.State == GameState.ClearLines)
             {
-                var b1 = DrawBall(0, 0, game.GetNextBallColor());
-                var b2 = DrawBall(0, 0, game.GetNextBallColor());
-                var b3 = DrawBall(0, 0, game.GetNextBallColor());
+                var b1 = DrawBall(0, 0, game.GetNextBallColor()); //todo note that DrawBall needs coordinates
+                var b2 = DrawBall(0, 0, game.GetNextBallColor()); // though the actual coordinates will be set by game logic later
+                var b3 = DrawBall(0, 0, game.GetNextBallColor()); // if Game for some reason does not do that, the ball shape will
+                                                                           // be drawn in the top-left corner, while logically it
+                                                                           // will not exist in the field
 
                 var shapesToRemove = game.BallsToClear.Select(b => game.Field[b.x, b.y]).ToList();
                 
-                game.ClearLinesAndShootNewBalls(new[] { b1, b2, b3 });
-                game.ApplyNewBallsAndProceedToNewMoveOrEndGame();
+                game.ClearLinesAndPrepareNewBallsToShoot(new[] { b1, b2, b3 });
+
+                // Not all of the balls b1, b2, b3 might have been added because of completed lines or no space
+                // check which balls are in the BallsToShoot and remove unused
+                if (!game.BallsToShoot.Any(b => b.ball == b1))
+                {
+                    _fieldCanvas.Children.Remove(b1);
+                }
+                if (!game.BallsToShoot.Any(b => b.ball == b2))
+                {
+                    _fieldCanvas.Children.Remove(b2);
+                }
+                if (!game.BallsToShoot.Any(b => b.ball == b3))
+                {
+                    _fieldCanvas.Children.Remove(b3);
+                }
+                //todo the code above is a clear code smell.
+                //  1) it looks like it's copy-pasted 3 times for 3 variables (minor issue)
+                //  2) the logic of adding balls is scattered, it has 2 disjoint parts in this method,
+                //     and there is an assumption about what should be happening in ClearLinesAndPrepareNewBallsToShoot
+                
+                
+                if (game.State == GameState.ShootNewBalls)
+                {
+                    game.ApplyNewBallsAndProceedToNewMoveOrEndGame();
+                }
 
                 foreach (var shape in shapesToRemove)
                 {
@@ -173,7 +199,7 @@ namespace UglyLines.Desktop.Views
         }
 
 
-        private void Button_OnClick(object? sender, RoutedEventArgs e)
+        private void ReloadButton_OnClick(object? sender, RoutedEventArgs e)
         {
             var shapesToRemove = new List<Ellipse>();
             
@@ -197,7 +223,7 @@ namespace UglyLines.Desktop.Views
             var b2 = DrawBall(0, 0, game.GetNextBallColor());
             var b3 = DrawBall(0, 0, game.GetNextBallColor());
 
-            game.ClearLinesAndShootNewBalls(new[] { b1, b2, b3 });
+            game.ClearLinesAndPrepareNewBallsToShoot(new[] { b1, b2, b3 });
             game.ApplyNewBallsAndProceedToNewMoveOrEndGame();
 
             UpdateBallPositions();
@@ -226,7 +252,7 @@ namespace UglyLines.Desktop.Views
         private void StyledElement_OnDataContextChanged(object? sender, EventArgs e)
         {
             //initial startup
-            Button_OnClick(sender, new RoutedEventArgs());
+            ReloadButton_OnClick(sender, new RoutedEventArgs());
         }
     }
 }
