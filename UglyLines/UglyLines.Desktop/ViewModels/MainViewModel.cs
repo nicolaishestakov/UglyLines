@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
+using Avalonia.Threading;
 using UglyLines.Desktop.Logic;
 using UglyLines.Desktop.Views;
 
@@ -11,8 +11,26 @@ namespace UglyLines.Desktop.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        public string Greeting => "Welcome to Avalonia!";
+        public string Greeting => "Welcome to Ugly Lines!";
 
+        public MainViewModel()
+        {
+            _animationTimer.Tick += (sender, args) =>
+            {
+                _animationController.Tick();
+            };
+
+            _animationController.FirstAnimationStarted += (sender, args) =>
+            {
+                _animationTimer.Start();
+            };
+
+            _animationController.AllAnimationsFinished += (sender, args) =>
+            {
+                _animationTimer.Stop();
+            };
+        }
+        
         public Game Game { get; private set; } = new Game(new FieldSettings
             {
                 LeftMargin = 30,
@@ -24,6 +42,11 @@ namespace UglyLines.Desktop.ViewModels
             },
             9, 9); //todo DRY
 
+        private DispatcherTimer _animationTimer = new DispatcherTimer {Interval = TimeSpan.FromMilliseconds(100)};
+        //todo the timer is Avalonia dependency, some cross-platform abstraction is needed here
+        
+        private AnimationController _animationController = new ();
+        
         public void StartGame()
         {
             Game = new Game(new FieldSettings
@@ -36,6 +59,21 @@ namespace UglyLines.Desktop.ViewModels
 
                 },
                 9, 9); //todo DRY
+        }
+
+        public void StartBallAppearAnimation(IEnumerable<Shape> balls)
+        {
+            foreach (var ball in balls)
+            {
+                if (ball is Ellipse ellipse)
+                {
+                    var ballAnimation = new BallAppearAnimation(ellipse, Game.FieldSettings.CellSize* 0.8); 
+                        //todo DRY, the CellSize*0.8 was copied from DrawBall method 
+                    _animationController.AddAnimation(ballAnimation);
+                }
+            }
+            
+            _animationController.Tick();
         }
         
         public void FieldCellClick(int x, int y)

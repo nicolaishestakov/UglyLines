@@ -173,6 +173,8 @@ namespace UglyLines.Desktop.Views
                 
                 if (game.State == GameState.ShootNewBalls)
                 {
+                    MainViewModel.StartBallAppearAnimation(game.BallsToShoot.Select(b => b.ball));
+                    
                     game.ApplyNewBallsAndProceedToNewMoveOrEndGame();
                 }
 
