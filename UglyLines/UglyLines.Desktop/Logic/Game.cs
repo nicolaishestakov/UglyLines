@@ -28,26 +28,26 @@ public class Game
     
     public bool IsWithinField(int x, int y) => x >= 0 && x < FieldWidth && y >= 0 && y < FieldHeight;
 
-    public bool CanMoveTo(int x, int y)
+    public bool CanMoveTo(int fromX, int fromY, int toX, int toY)
     {
-        if (!IsWithinField(x, y))
+        if (!IsWithinField(fromX, fromY) || !IsWithinField(toX, toY))
         {
             return false;
         }
-
-        if (_field[x,y] != null)
-        {
-            return false;
-        }
-
-        if (!SelectedBallCell.HasValue)
+        
+        if (_field[toX, toY] != null)
         {
             return false;
         }
         
         var pathfinder = Pathfinder.Create(_field, (shape) => shape != null);
 
-        return pathfinder.CanMove(SelectedBallCell.Value, (x, y));
+        return pathfinder.CanMove((fromX, fromY), (toX, toY));
+    }
+    
+    public bool CanMoveTo(int x, int y)
+    {
+        return SelectedBallCell.HasValue && CanMoveTo(SelectedBallCell.Value.x, SelectedBallCell.Value.y, x, y);
     }
     
     

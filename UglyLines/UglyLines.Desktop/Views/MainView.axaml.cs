@@ -125,19 +125,9 @@ namespace UglyLines.Desktop.Views
                 return vm;
             }
         }
-        
-        private void GameField_OnPointerPressed(object? sender, PointerPressedEventArgs e)
-        {
-            if (MainViewModel.Game.State == GameState.GameOver)
-            {
-                return;
-            }
-            
-            var p = e.GetCurrentPoint(_fieldCanvas);
-            int x = (int)Math.Floor((p.Position.X - _fieldSettings.LeftMargin) / _fieldSettings.CellSize);
-            int y = (int)Math.Floor((p.Position.Y - _fieldSettings.TopMargin) / _fieldSettings.CellSize);
 
-            //DrawBall(x, y, Color.Parse("Red"));
+        private void OnFieldClick(int x, int y)
+        {
             MainViewModel.FieldCellClick(x, y);
 
             var game = MainViewModel.Game; 
@@ -197,6 +187,20 @@ namespace UglyLines.Desktop.Views
                 UpdateBallPositions();
             }
         }
+        
+        private void GameField_OnPointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            if (MainViewModel.Game.State == GameState.GameOver)
+            {
+                return;
+            }
+            
+            var p = e.GetCurrentPoint(_fieldCanvas);
+            int x = (int)Math.Floor((p.Position.X - _fieldSettings.LeftMargin) / _fieldSettings.CellSize);
+            int y = (int)Math.Floor((p.Position.Y - _fieldSettings.TopMargin) / _fieldSettings.CellSize);
+
+            OnFieldClick(x, y);
+        }
 
 
         private void ReloadButton_OnClick(object? sender, RoutedEventArgs e)
@@ -253,6 +257,22 @@ namespace UglyLines.Desktop.Views
         {
             //initial startup
             ReloadButton_OnClick(sender, new RoutedEventArgs());
+        }
+
+        private void AutoMoveButton_OnClick(object? sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var cellTo = MainViewModel.GetRandomEmptyCell();
+                var cellFrom = MainViewModel.GetRandomBallCellThatCanMoveTo(cellTo.x, cellTo.y);
+                
+                OnFieldClick(cellFrom.x, cellFrom.y);
+                OnFieldClick(cellTo.x, cellTo.y);
+            }
+            catch (Exception exception)
+            {
+                // can't move
+            }
         }
     }
 }

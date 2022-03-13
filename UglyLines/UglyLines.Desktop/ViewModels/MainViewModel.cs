@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
@@ -79,6 +80,59 @@ namespace UglyLines.Desktop.ViewModels
                     }
                 }
             }
+        }
+        
+        private (int x, int y) GetRandomCell(bool shouldBeEmpty)
+        {
+            var rnd = new Random();
+            
+            var cells = new List<(int x, int y)>();
+            
+            for (var x = 0; x < Game.FieldWidth; x++)
+            for (var y = 0; y < Game.FieldHeight; y++)
+            {
+                if ((shouldBeEmpty && Game.Field[x, y] == null) ||
+                    (!shouldBeEmpty && Game.Field[x, y] != null))
+                {
+                    cells.Add((x, y));
+                }
+            }
+
+            if (!cells.Any())
+            {
+                throw new Exception("No appropriate cell in the field");
+            }
+
+            return cells[rnd.Next(0, cells.Count)];
+        }
+
+        public (int x, int y) GetRandomBallCellThatCanMoveTo(int toX, int toY)
+        {
+            for (var i = 0; i < 1000; i++)
+            {
+                var ballCell = GetRandomCell(false);
+                if (Game.CanMoveTo(ballCell.x, ballCell.y, toX, toY))
+                {
+                    return ballCell;
+                }
+            }
+            
+            // very improbable, but if such ball not found, just go through every ball
+            for (var x = 0; x < Game.FieldWidth; x++)
+            for (var y = 0; y < Game.FieldHeight; y++)
+            {
+                if (Game.CanMoveTo(x, y, toX, toY))
+                {
+                    return (x, y);
+                }
+            }
+
+            throw new Exception("No move available");
+        }
+        
+        public (int x, int y) GetRandomEmptyCell()
+        {
+            return GetRandomCell(true);
         }
     }
 }
