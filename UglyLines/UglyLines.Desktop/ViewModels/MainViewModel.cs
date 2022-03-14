@@ -76,6 +76,29 @@ namespace UglyLines.Desktop.ViewModels
             _animationController.Tick();
         }
         
+        
+        public void StartBallDisappearAnimation(IEnumerable<Shape> balls, Action<Animation>? onAnimationFinished)
+        {
+            foreach (var ball in balls)
+            {
+                if (ball is Ellipse ellipse)
+                {
+                    var ballAnimation = new BallDisappearAnimation(ellipse, Game.FieldSettings.CellSize* 0.8); 
+                    //todo DRY, the CellSize*0.8 was copied from DrawBall method 
+
+                    if (onAnimationFinished != null)
+                    {
+                        EventHandler<AnimationFinishedEventArgs> animationFinishedHandler = (object? sender, AnimationFinishedEventArgs args) =>
+                        {
+                            onAnimationFinished?.Invoke(ballAnimation);
+                        };
+                        ballAnimation.AnimationFinished += animationFinishedHandler;
+                    }
+                    _animationController.AddAnimation(ballAnimation);
+                }
+            }
+        }
+        
         public void FieldCellClick(int x, int y)
         {
             if (Game.State == GameState.WaitingForSelection && Game.IsWithinField(x, y))

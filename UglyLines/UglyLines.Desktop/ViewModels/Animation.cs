@@ -1,4 +1,6 @@
-﻿namespace UglyLines.Desktop.ViewModels; //todo it is not quite a view model, later this will be moved to a diff namespace
+﻿using System;
+
+namespace UglyLines.Desktop.ViewModels; //todo it is not quite a view model, later this will be moved to a diff namespace
 
 public abstract class Animation
 {
@@ -22,6 +24,13 @@ public abstract class Animation
         if (Step < EndStep)
         {
             Step++;
+
+            if (IsOver())
+            {
+                AnimationFinished?.Invoke(this, new AnimationFinishedEventArgs(this));
+            }
         }
     }
+    
+    public event EventHandler<AnimationFinishedEventArgs> AnimationFinished;
 }

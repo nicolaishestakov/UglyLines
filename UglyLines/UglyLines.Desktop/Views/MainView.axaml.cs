@@ -137,6 +137,8 @@ namespace UglyLines.Desktop.Views
                 game.MovingBall.StrokeThickness = 0; //remove selection
                 //todo implement animation in UI
                 game.EndMakingMove();
+                
+                UpdateBallPositions();
             }
 
             if (game.State == GameState.ClearLines)
@@ -148,6 +150,14 @@ namespace UglyLines.Desktop.Views
                                                                            // will not exist in the field
 
                 var shapesToRemove = game.BallsToClear.Select(b => game.Field[b.x, b.y]).ToList();
+                
+                MainViewModel.StartBallDisappearAnimation(shapesToRemove, (Animation animation) =>
+                {
+                    if (animation is BallDisappearAnimation bda)
+                    {
+                        _fieldCanvas.Children.Remove(bda.Ball);
+                    }
+                });
                 
                 game.ClearLinesAndPrepareNewBallsToShoot(new[] { b1, b2, b3 });
 
@@ -176,14 +186,6 @@ namespace UglyLines.Desktop.Views
                     MainViewModel.StartBallAppearAnimation(game.BallsToShoot.Select(b => b.ball));
                     
                     game.ApplyNewBallsAndProceedToNewMoveOrEndGame();
-                }
-
-                foreach (var shape in shapesToRemove)
-                {
-                    if (shape != null)
-                    {
-                        _fieldCanvas.Children.Remove(shape);
-                    }
                 }
                 
                 UpdateBallPositions();
