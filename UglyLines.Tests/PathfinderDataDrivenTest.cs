@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Collections.Generic;
+using FluentAssertions;
 using UglyLines.Desktop.Logic;
 using Xunit;
 
@@ -33,4 +34,18 @@ public class PathfinderDataDrivenTest
     {
         _pathfinder.CanMove((fromX, fromY), (toX, toY)).Should().Be(canMove);
     }
+
+    [Theory, MemberData(nameof(CellsAvailableFromData))]
+    public void CellsAvailableFrom((int X, int Y) from, IEnumerable<(int X, int Y)> availableCellsExpected)
+    {
+        var availableCells = _pathfinder.CellsAvailableFrom(from);
+
+        availableCells.Should().BeEquivalentTo(availableCellsExpected);
+    }
+    
+    public static IEnumerable<object[]> CellsAvailableFromData => 
+        new List<object[]>
+        {
+            new object[] { (3, 0), new [] {(2, 0), (1, 0), (1, 1), (1, 2), (0, 1), (0, 2)} },
+        };
 }

@@ -88,6 +88,11 @@ public class Pathfinder
         return false;
     }
 
+    public IEnumerable<(int X, int Y)> CellsAvailableFrom((int x, int y) from)
+    {
+        throw new NotImplementedException();
+    }
+
     private static bool IsWithinBounds((int x, int y) xy, int w, int h)
     {
         return xy.x >= 0 && xy.x < w && xy.y >= 0 && xy.y < h;
