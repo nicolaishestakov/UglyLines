@@ -94,6 +94,8 @@ public class Pathfinder
         var waveFront = new List<(int x, int y)>() { from };
         var nextWaveFront = new List<(int x, int y)>();
 
+        waveField[from.x, from.y] = 0; //starting cell must have zero weight 
+        
         while (waveFront.Any())
         {
             foreach (var cell in waveFront)
