@@ -38,22 +38,8 @@ public class Pathfinder
             return false;
         }
 
-        var waveField = new int[w, h];
+        var waveField = GetWaveField(_field);
         
-        for (var x = 0; x < w; x++)
-        for (var y = 0; y < h; y++)
-        {
-            if (_field[x, y]) 
-            {
-                //can't go here
-                waveField[x, y] = -1;
-            }
-            else
-            {
-                waveField[x, y] = int.MaxValue;
-            }
-        }
-
         waveField[from.x, from.y] = 0;
 
         var waveFront = new List<(int x, int y)>() { from };
@@ -90,9 +76,86 @@ public class Pathfinder
 
     public IEnumerable<(int X, int Y)> CellsAvailableFrom((int x, int y) from)
     {
-        throw new NotImplementedException();
+        var w = _field.GetLength(0);
+        var h = _field.GetLength(1);
+
+        if (!IsWithinBounds(from, w, h))
+        {
+            yield break;
+        }
+        
+        var waveField = GetWaveField(_field);
+        
+        
+        //todo DRY principle violation
+        // this code is copy-pasted from CanMove method with only minor adjustments
+        // duplicate logic must be extracted as common code
+        
+        var waveFront = new List<(int x, int y)>() { from };
+        var nextWaveFront = new List<(int x, int y)>();
+
+        while (waveFront.Any())
+        {
+            foreach (var cell in waveFront)
+            {
+                var cellWeight = waveField[cell.x, cell.y];
+
+                foreach (var adjCell in GetAdjacentCells(cell))
+                {
+                    var weight = waveField[adjCell.x, adjCell.y];
+                    if (cellWeight + 1 < weight)
+                    {
+                        waveField[adjCell.x, adjCell.y] = cellWeight + 1;
+                        nextWaveFront.Add(adjCell);
+                    }
+                }
+            }
+            
+            waveFront.Clear();
+            (waveFront, nextWaveFront) = (nextWaveFront, waveFront);
+        }
+        
+        for (var x = 0; x < w; x++)
+        for (var y = 0; y < h; y++)
+        {
+            if (x == from.x && y == from.y)
+            {
+                continue; // the initial cell is not included as available
+            }
+            
+            var cellWeight = waveField[x, y];
+
+            if (cellWeight > 0 && cellWeight < int.MaxValue)
+            {
+                yield return (x, y);
+            }
+        }
     }
 
+    private static int[,] GetWaveField(bool[,] field)
+    {
+        var w = field.GetLength(0);
+        var h = field.GetLength(1);
+        
+        var waveField = new int[w, h];
+        
+        for (var x = 0; x < w; x++)
+        for (var y = 0; y < h; y++)
+        {
+            if (field[x, y]) 
+            {
+                //can't go here
+                waveField[x, y] = -1;
+            }
+            else
+            {
+                waveField[x, y] = int.MaxValue;
+            }
+        }
+
+        return waveField;
+    }
+    
     private static bool IsWithinBounds((int x, int y) xy, int w, int h)
     {
         return xy.x >= 0 && xy.x < w && xy.y >= 0 && xy.y < h;

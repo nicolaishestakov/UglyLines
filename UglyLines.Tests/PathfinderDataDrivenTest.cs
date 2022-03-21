@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using FluentAssertions;
 using UglyLines.Desktop.Logic;
 using Xunit;
@@ -38,7 +39,7 @@ public class PathfinderDataDrivenTest
     [Theory, MemberData(nameof(CellsAvailableFromData))]
     public void CellsAvailableFrom((int X, int Y) from, IEnumerable<(int X, int Y)> availableCellsExpected)
     {
-        var availableCells = _pathfinder.CellsAvailableFrom(from);
+        var availableCells = _pathfinder.CellsAvailableFrom(from).ToList();
 
         availableCells.Should().BeEquivalentTo(availableCellsExpected);
     }
