@@ -1,49 +1,49 @@
-﻿namespace UglyLines.Desktop.Logic;
+﻿using System;
+using System.Collections.Generic;
+
+namespace UglyLines.Desktop.Logic;
 
 public class Field
 {
+    public Field(int width, int height)
+    {
+        _cells = new IBall[width, height];
+    }
+
+    private readonly IBall?[,] _cells;
+
+    public int Width => _cells.GetLength(0);
+    public int Height => _cells.GetLength(1);
+
+    public bool IsWithinBounds(Location xy)
+    {
+        return xy.X >= 0 && xy.X < Width && xy.Y >= 0 && xy.Y < Height;
+    }
     
-}
-
-public enum BallColor
-{
-    Red,
-    Green,
-    Blue,
-    Cyan,
-    Yellow,
-    Brown,
-    Magenta
-}
-
-public class Ball
-{
-    public Ball(BallColor color)
+    public IBall? GetBall(Location xy)
     {
-        Color = color;
-    }
-    public BallColor Color { get; }
-}
+        if (!IsWithinBounds(xy))
+        {
+            throw new ArgumentOutOfRangeException(nameof(xy));
+        }
 
-public record BallXY
-{
-    public Location Location { get; }
-    public Ball Ball { get; }
-}
-
-public struct Location
-{
-    public Location(int x, int y)
-    {
-        X = x;
-        Y = y;
+        return _cells[xy.X, xy.Y];
     }
 
-    public void Deconstruct(out int x, out int y)
+    public IEnumerable<BallXY> GetBalls()
     {
-        x = X;
-        y = Y;
+        var w = Width;
+        var h = Height;
+        
+        for (var x = 0; x < w; x++)
+        for (var y = 0; y < h; y++)
+        {
+            var location = new Location(x, y);
+            var ball = GetBall(location);
+            if (ball != null)
+            {
+                yield return new BallXY(ball, location);
+            }
+        }
     }
-    public int X { get;  }
-    public int Y { get;  }
 }
