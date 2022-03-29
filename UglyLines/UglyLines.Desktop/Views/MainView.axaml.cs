@@ -130,7 +130,7 @@ namespace UglyLines.Desktop.Views
         {
             MainViewModel.FieldCellClick(x, y);
 
-            var game = MainViewModel.Game; 
+            var game = MainViewModel.GamePresenter; 
             
             if (game.State == GameState.BallMoving)
             {
@@ -194,7 +194,7 @@ namespace UglyLines.Desktop.Views
         
         private void GameField_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (MainViewModel.Game.State == GameState.GameOver)
+            if (MainViewModel.GamePresenter.State == GameState.GameOver)
             {
                 return;
             }
@@ -225,7 +225,7 @@ namespace UglyLines.Desktop.Views
             
             MainViewModel.StartGame();
 
-            var game = MainViewModel.Game;
+            var game = MainViewModel.GamePresenter;
 
             var b1 = DrawBall(0, 0, game.GetNextBallColor()); //todo DRY
             var b2 = DrawBall(0, 0, game.GetNextBallColor());
@@ -239,7 +239,7 @@ namespace UglyLines.Desktop.Views
 
         private void UpdateBallPositions()
         {
-            var game = MainViewModel.Game;
+            var game = MainViewModel.GamePresenter;
             
             for (var x  = 0; x<=game.Field.GetUpperBound(0); x++)
             for (var y = 0; y <= game.Field.GetUpperBound(1); y++)

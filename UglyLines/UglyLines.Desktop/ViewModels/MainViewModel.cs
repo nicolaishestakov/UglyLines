@@ -31,7 +31,7 @@ namespace UglyLines.Desktop.ViewModels
             };
         }
         
-        public Game Game { get; private set; } = new Game(new FieldSettings
+        public GamePresenter GamePresenter { get; private set; } = new GamePresenter(new FieldSettings
             {
                 LeftMargin = 30,
                 TopMargin = 80,
@@ -49,7 +49,7 @@ namespace UglyLines.Desktop.ViewModels
         
         public void StartGame()
         {
-            Game = new Game(new FieldSettings
+            GamePresenter = new GamePresenter(new FieldSettings
                 {
                     LeftMargin = 30,
                     TopMargin = 80,
@@ -67,7 +67,7 @@ namespace UglyLines.Desktop.ViewModels
             {
                 if (ball is Ellipse ellipse)
                 {
-                    var ballAnimation = new BallAppearAnimation(ellipse, Game.FieldSettings.CellSize* 0.8); 
+                    var ballAnimation = new BallAppearAnimation(ellipse, GamePresenter.FieldSettings.CellSize* 0.8); 
                         //todo DRY, the CellSize*0.8 was copied from DrawBall method 
                     _animationController.AddAnimation(ballAnimation);
                 }
@@ -83,7 +83,7 @@ namespace UglyLines.Desktop.ViewModels
             {
                 if (ball is Ellipse ellipse)
                 {
-                    var ballAnimation = new BallDisappearAnimation(ellipse, Game.FieldSettings.CellSize* 0.8); 
+                    var ballAnimation = new BallDisappearAnimation(ellipse, GamePresenter.FieldSettings.CellSize* 0.8); 
                     //todo DRY, the CellSize*0.8 was copied from DrawBall method 
 
                     if (onAnimationFinished != null)
@@ -101,11 +101,11 @@ namespace UglyLines.Desktop.ViewModels
         
         public void FieldCellClick(int x, int y)
         {
-            if (Game.State == GameState.WaitingForSelection && Game.IsWithinField(x, y))
+            if (GamePresenter.State == GameState.WaitingForSelection && GamePresenter.IsWithinField(x, y))
             {
                 try
                 {
-                    var ball = Game.SelectBall(x, y);
+                    var ball = GamePresenter.SelectBall(x, y);
                     (ball as Ellipse).Stroke = new SolidColorBrush(Color.Parse("Black"));
                     (ball as Ellipse).StrokeThickness = 4;
                 }
@@ -114,24 +114,24 @@ namespace UglyLines.Desktop.ViewModels
                 }
             }
             
-            if (Game.State == GameState.BallSelected)
+            if (GamePresenter.State == GameState.BallSelected)
             {
-                if (Game.CanMoveTo(x, y))
+                if (GamePresenter.CanMoveTo(x, y))
                 {
-                    Game.StartMakingMove(x, y);
+                    GamePresenter.StartMakingMove(x, y);
                 }
-                else if (Game.IsWithinField(x, y) && Game.Field[x, y] != null)
+                else if (GamePresenter.IsWithinField(x, y) && GamePresenter.Field[x, y] != null)
                 {
                     //select another ball
                     try
                     {
-                        var selectedBall = Game.SelectedBall;
+                        var selectedBall = GamePresenter.SelectedBall;
                         
-                        var ball = Game.SelectBall(x, y); //todo duplicate code
+                        var ball = GamePresenter.SelectBall(x, y); //todo duplicate code
                         (ball as Ellipse).Stroke = new SolidColorBrush(Color.Parse("Black"));
                         (ball as Ellipse).StrokeThickness = 4;
 
-                        if (selectedBall != null && selectedBall != Game.SelectedBall)
+                        if (selectedBall != null && selectedBall != GamePresenter.SelectedBall)
                         {
                             (selectedBall as Ellipse).StrokeThickness = 0;
                         }
@@ -149,11 +149,11 @@ namespace UglyLines.Desktop.ViewModels
             
             var cells = new List<(int x, int y)>();
             
-            for (var x = 0; x < Game.FieldWidth; x++)
-            for (var y = 0; y < Game.FieldHeight; y++)
+            for (var x = 0; x < GamePresenter.FieldWidth; x++)
+            for (var y = 0; y < GamePresenter.FieldHeight; y++)
             {
-                if ((shouldBeEmpty && Game.Field[x, y] == null) ||
-                    (!shouldBeEmpty && Game.Field[x, y] != null))
+                if ((shouldBeEmpty && GamePresenter.Field[x, y] == null) ||
+                    (!shouldBeEmpty && GamePresenter.Field[x, y] != null))
                 {
                     cells.Add((x, y));
                 }
@@ -172,17 +172,17 @@ namespace UglyLines.Desktop.ViewModels
             for (var i = 0; i < 1000; i++)
             {
                 var ballCell = GetRandomCell(false);
-                if (Game.CanMoveTo(ballCell.x, ballCell.y, toX, toY))
+                if (GamePresenter.CanMoveTo(ballCell.x, ballCell.y, toX, toY))
                 {
                     return ballCell;
                 }
             }
             
             // very improbable, but if such ball not found, just go through every ball
-            for (var x = 0; x < Game.FieldWidth; x++)
-            for (var y = 0; y < Game.FieldHeight; y++)
+            for (var x = 0; x < GamePresenter.FieldWidth; x++)
+            for (var y = 0; y < GamePresenter.FieldHeight; y++)
             {
-                if (Game.CanMoveTo(x, y, toX, toY))
+                if (GamePresenter.CanMoveTo(x, y, toX, toY))
                 {
                     return (x, y);
                 }

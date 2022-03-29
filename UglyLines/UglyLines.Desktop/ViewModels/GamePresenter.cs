@@ -5,12 +5,19 @@ using System.Threading;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using UglyLines.Desktop.Views;
+using UglyLines.Desktop.Logic;
 
-namespace UglyLines.Desktop.Logic;
+namespace UglyLines.Desktop.ViewModels;
 
-public class Game
+/// <summary>
+/// This is the ex Game class
+/// It has been renamed to GamePresenter in order to make a new Game class in Logic namespace
+/// This class is too much tangled with UI so it more belongs to presenting layer
+/// It will be refactored to use the new Game class 
+/// </summary>
+public class GamePresenter
 {
-    public Game(FieldSettings fieldSettings, int fieldWidth, int fieldHeight)
+    public GamePresenter(FieldSettings fieldSettings, int fieldWidth, int fieldHeight)
     {
         FieldSettings = fieldSettings;
         FieldWidth = fieldWidth;
