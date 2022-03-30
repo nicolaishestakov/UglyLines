@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace UglyLines.Desktop.Logic;
 
@@ -45,5 +46,65 @@ public class Field
                 yield return new BallXY(ball, location);
             }
         }
+    }
+
+    public event EventHandler<BallAddedEventArgs>? BallAdded;
+
+    public event EventHandler<BallMovedEventArgs>? BallMoved;
+
+    public event EventHandler<BallsRemovedEventArgs>? BallsRemoved;
+
+    public void AddBall(BallXY ballXY)
+    {
+        if (GetBall(ballXY.Location) != null)
+        {
+            throw new ArgumentException("Cell is already occupied", nameof(ballXY));
+        }
+
+        _cells[ballXY.Location.X, ballXY.Location.Y] = ballXY.Ball;
+        
+        BallAdded?.Invoke(this, new BallAddedEventArgs(ballXY));
+    }
+
+    public void MoveBall(Location from, Location to)
+    {
+        var ball = GetBall(from);
+
+        if (ball == null)
+        {
+            throw new ArgumentException($"The cell {from.X}, {from.Y} is empty");
+        }
+        
+        if (GetBall(to) != null)
+        {
+            throw new ArgumentException("Cell is already occupied", nameof(to)); //todo duplicate message
+        }
+
+        _cells[from.X, from.Y] = null;
+        _cells[to.X, to.Y] = ball;
+        
+        BallMoved?.Invoke(this, new BallMovedEventArgs(ball, from, to));
+    }
+
+    public void Clear()
+    {
+        var balls = new List<BallXY>();
+        
+        var w = Width;
+        var h = Height;
+        
+        for (var x = 0; x < w; x++)
+        for (var y = 0; y < h; y++)
+        {
+            var location = new Location(x, y);
+            var ball = GetBall(location);
+            if (ball != null)
+            {
+                balls.Add(new BallXY(ball, location));
+                _cells[x, y] = null;
+            }
+        }
+        
+        BallsRemoved?.Invoke(this, new BallsRemovedEventArgs(balls));
     }
 }
