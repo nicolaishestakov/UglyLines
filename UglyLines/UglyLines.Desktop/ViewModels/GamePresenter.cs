@@ -246,6 +246,7 @@ public class GamePresenter
         return brush?.Color;
     }
     
+    //todo to be replaced with LineCounter
     private (int x, int y) GetLineEndCellInDirection((int x, int y) startCell, int dx, int dy, Color color)
     {
         var nextX = startCell.x + dx;
@@ -264,6 +265,7 @@ public class GamePresenter
     }
    
     
+    //todo to be replaced with LineCounter
     private List<(int x, int y)> GetCompleteLineBallsInDirection((int x, int y) startCell, int dx, int dy, Color color)
     {
         var lineEnd1 = GetLineEndCellInDirection(startCell, dx, dy, color);
@@ -298,6 +300,7 @@ public class GamePresenter
         return result;
     }
     
+    //todo to be replaced with LineCounter
     private List<(int x, int y)> CheckBallsToClear(int x, int y, Shape ballToSet)
     {
         var ballBrush = ballToSet.Fill as SolidColorBrush;
