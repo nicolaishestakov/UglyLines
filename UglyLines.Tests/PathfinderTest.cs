@@ -8,7 +8,7 @@ public class PathfinderTest
     [Fact]
     public void SimpleCanMoveTo()
     {
-        var field = new int[,]
+        var field = new[,]
         {//y= 0  1  2
             { 1, 1, 1 }, // x == 0
             { 0, 1, 0 }, // x == 1

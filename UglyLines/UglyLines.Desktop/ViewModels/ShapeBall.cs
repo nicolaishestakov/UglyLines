@@ -11,13 +11,16 @@ public class ShapeBall: IBall
     public ShapeBall(BallColor color, double cellSize)
     {
         Color = color;
-        Shape = CreateShape(cellSize);
+        _cellSize = cellSize;
+        Shape = CreateShape();
     }
 
     public BallColor Color { get; }
     
     public Shape Shape { get; }
 
+    private double _cellSize;
+    
     public void PutToCanvas(Canvas canvas, double x, double y)
     {
         RemoveFromCanvas();
@@ -40,8 +43,8 @@ public class ShapeBall: IBall
     {
         if (_canvas != null)
         {
-            Canvas.SetLeft(Shape, x);
-            Canvas.SetTop(Shape, y);
+            Canvas.SetLeft(Shape, GetAdjustedX(x));
+            Canvas.SetTop(Shape, GetAdjustedY(y));
         }
     }
 
@@ -63,17 +66,31 @@ public class ShapeBall: IBall
     }
 
     private Canvas? _canvas;
-
-    protected virtual Shape CreateShape(double cellSize) 
+    
+    protected virtual Shape CreateShape() 
     {
         var ellipse = new Ellipse()
         {
             Fill = new SolidColorBrush(GetBallShapeColor(Color)),
-            Width = cellSize * 0.8,
-            Height = cellSize * 0.8,
+            Width = GetShapeSize(),
+            Height = GetShapeSize(),
         };
 
         return ellipse;
+    }
+
+    private double GetShapeSize()
+    {
+        return 0.8 * _cellSize;
+    }
+
+    private double GetAdjustedX(double cellLeftX)
+    {
+        return cellLeftX + (_cellSize - GetShapeSize()) / 2;
+    }
+    private double GetAdjustedY(double cellLeftY)
+    {
+        return cellLeftY + (_cellSize - GetShapeSize()) / 2;
     }
 
     protected Color GetBallShapeColor(BallColor ballColor)

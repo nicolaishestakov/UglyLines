@@ -17,15 +17,17 @@ namespace UglyLines.Desktop.Logic;
                     Moving animation can be performed here
             V
         FinishMove()
-            V
-    [ClearingLines]    The ball is moved in the field in the new position
-                    Balls in the lines to be cleared are marked (BallsToClear property)
-                    The balls to clear are kept in the field 
-                    Delete lines animation can be performed here
-            V
-        ShootNewBalls()                       
-                      
-            V 
+        |
+     /  or \
+    /      V
+   / [ClearingLines]    The ball is moved in the field in the new position
+   |                Balls in the lines to be cleared are marked (BallsToClear property)
+   |                The balls to clear are kept in the field 
+   |                Delete lines animation can be performed here
+ShootNewBalls()       
+   \                           
+     \                 
+     V     V 
     [ShootingNewBalls] New balls are to be added in the field
                     The balls to clear are removed from the field
                     The balls to be added are marked (BallsToShoot property)
@@ -33,12 +35,12 @@ namespace UglyLines.Desktop.Logic;
             V
         FinishShootingBalls()
             V
-    [ClearingLines]    //TODO not yet implemented
-                    Clearing balls in the lines completed after adding the new balls
-                    Balls in the lines to be cleared are marked (BallsToClear property)
-                    The balls to clear are kept in the field 
-                    Delete lines animation can be performed here
-                    //TODO May need an additional state to distinguish from ClearLines after FinishMove()
+    [ClearingLines]
+            |        Clearing balls in the lines completed after adding the new balls
+            |        Balls in the lines to be cleared are marked (BallsToClear property)
+            |        The balls to clear are kept in the field 
+            |        Delete lines animation can be performed here
+            |        
             V
          NextMoveOrEndGame()  If the field is not full, proceed to [WaitingForSelection]
             V
@@ -129,7 +131,22 @@ public class Game
         Field.MoveBall(from, to);
         MovingBall = null;
 
+        SearchLinesToClear(new[]{to});
+
+        if (_ballsToClear.Any())
+        {
+            GameState = GameState.ClearingLines;            
+        }
+        else
+        {
+            ShootNewBalls();
+        }
+    }
+
+    private void SearchLinesToClear(IEnumerable<Location> to)
+    {
         _ballsToClear.Clear();
+        
         foreach (var cellToClear in GetLinesToClear(to))
         {
             var ball = Field.GetBall(cellToClear);
@@ -139,13 +156,11 @@ public class Game
                 _ballsToClear.Add(new BallXY(ball, cellToClear));
             }
         }
-
-        GameState = GameState.ClearingLines;
     }
 
     public void ShootNewBalls()
     {
-        ValidateGameState(new[] { GameState.ClearingLines });
+        ValidateGameState(new[] { GameState.BallMoving });
 
         Field.RemoveBalls(_ballsToClear.Select(b => b.Location));
         _ballsToClear.Clear();
@@ -177,10 +192,11 @@ public class Game
         {
             Field.AddBall(ballXy);
         }
+
+        var addedLocations = _ballsToShoot.Select(b => b.Location).ToList();
         _ballsToShoot.Clear();
         
-        //todo need to implement removing the lines after new balls are added
-        // Find balls to clear
+        SearchLinesToClear(addedLocations);
 
         GameState = GameState.ClearingLines;
     }
@@ -221,17 +237,24 @@ public class Game
         MovingBall = null;
         ChangeSelectedBallCell(null);
 
-        _gameState = GameState.ClearingLines;
+        _gameState = GameState.BallMoving;
         
         _nextBalls.AddRange(ballsOnField);
         ShootNewBalls();
     }
     
-    private IEnumerable<Location> GetLinesToClear(Location cellToCheck) 
+    private IEnumerable<Location> GetLinesToClear(IEnumerable<Location> cellsToCheck) 
     {
         var lineCounter = new LineCounter(new FieldAdapter(Field));
-        return lineCounter.GetCompleteLines(cellToCheck);
+        foreach (var location in cellsToCheck)
+        {
+            foreach (var result in lineCounter.GetCompleteLines(location))
+            {
+                yield return result;
+            }
+        }
     }
+    
     public Field Field { get; private set; }
 
     private GameState _gameState;

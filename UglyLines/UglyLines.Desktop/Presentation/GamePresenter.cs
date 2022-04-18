@@ -89,13 +89,13 @@ public class GamePresenter
                 //Ball selection will be handled in event handler
                 break;
             case GameState.BallMoving:
-                //Ball move will be handled in Field event hadler
+                //Ball move will be handled in Field event handler
                 //todo here could be moving animation
                 //when it finishes: 
                 EndMakingMove();
                 break;
             case GameState.ClearingLines:
-                ProceedToClearingLines(e.OldState);
+                ProceedToClearingLines();
                 break;
             case GameState.ShootingNewBalls:
                 ProceedToShootingNewBalls();
@@ -108,30 +108,71 @@ public class GamePresenter
 
     private void ProceedToShootingNewBalls()
     {
-        //todo
-        // Game.BallsToShoot animation should be started here 
-        // Here will be a problem: Field will add the balls only at the next game state 
-        // But the animation will have to draw them on canvas
-        // When the animation finishes:
-        Game.FinishShootingBalls();
-    }
-    
-    private void ProceedToClearingLines(GameState previousState)
-    {
-        // todo
-        // to make animation work, the next game state must start after the animation is finished  
-        // var ballsToClear = Game.BallsToClear.Select(b => b.Ball).OfType<ShapeBall>().ToList();
-        //
-        // if (ballsToClear.Any())
-        // {
-        //     StartBallDisappearAnimation(ballsToClear, null);                
-        // }
+        List<Shape> ballsToAppear = new List<Shape>();
 
-        if (previousState == GameState.BallMoving)
+        foreach (var ballXy in Game.BallsToShoot)
         {
-            Game.ShootNewBalls();
+            if (ballXy.Ball is ShapeBall shapeBall)
+            {
+                shapeBall.PutToCanvas(_canvas, 
+                    FieldSettings.FieldToCanvasX(ballXy.Location.X),  //todo similar code is in FieldOnBallAdded/Moved
+                    FieldSettings.FieldToCanvasY(ballXy.Location.Y)); //when abstracting _canvas, encapsulate this logic as well
+                
+                ballsToAppear.Add(shapeBall.Shape);
+            }
         }
-        else if (previousState == GameState.ShootingNewBalls)
+
+        void OnAppearBallsAnimationsFinished(object? sender, EventArgs args)
+        {
+            if (sender is AnimationController ac)
+            {
+                ac.AllAnimationsFinished -= OnAppearBallsAnimationsFinished;
+            }
+
+            AfterAnimationContinuation();
+        }
+        
+        if (ballsToAppear.Any())
+        {
+            StartBallAppearAnimation(ballsToAppear, OnAppearBallsAnimationsFinished);
+        }
+        else
+        {
+            AfterAnimationContinuation();
+        }
+
+        // When the animation finishes:
+        void AfterAnimationContinuation()
+        {
+            Game.FinishShootingBalls();            
+        }
+        
+    }
+
+    private void ProceedToClearingLines()
+    {
+        var ballsToClear = Game.BallsToClear.Select(b => b.Ball).OfType<ShapeBall>().ToList();
+
+        void OnClearLinesAnimationsFinished(object? sender, EventArgs args)
+        {
+            if (sender is AnimationController ac)
+            {
+                ac.AllAnimationsFinished -= OnClearLinesAnimationsFinished;
+            }
+
+            AfterAnimationContinuation();
+        }
+
+        if (ballsToClear.Any())
+        {
+            StartBallDisappearAnimation(ballsToClear, OnClearLinesAnimationsFinished);
+        }
+        else
+        {
+            AfterAnimationContinuation();
+        }
+
+        void AfterAnimationContinuation()
         {
             Game.NextMoveOrEndGame(GetNextBalls());
         }
@@ -166,14 +207,14 @@ public class GamePresenter
         Game.FinishMove();
     }
 
-    private static readonly BallColor[] _ballColors = Enum.GetValues<BallColor>();
+    private static readonly BallColor[] BallColors = Enum.GetValues<BallColor>();
     
     public BallColor GetNextBallColor()
     {
         var random = new Random();
-        var colorIndex = random.Next(_ballColors.GetLowerBound(0), _ballColors.GetUpperBound(0) + 1);
+        var colorIndex = random.Next(BallColors.GetLowerBound(0), BallColors.GetUpperBound(0) +1);
 
-        return _ballColors[colorIndex];
+        return BallColors[colorIndex];
     }
 
     private IEnumerable<IBall> GetNextBalls()
@@ -190,40 +231,62 @@ public class GamePresenter
 
     private AnimationController _animationController;
     
-    public void StartBallAppearAnimation(IEnumerable<Shape> balls)
+    public void StartBallAppearAnimation(IEnumerable<Shape> balls, EventHandler<EventArgs>? onAllAnimationsFinished)
     {
+        bool animationsStarted = false;
+        
         foreach (var ball in balls)
         {
-            if (ball is Ellipse ellipse)
+            if (ball is not Ellipse ellipse) continue;
+            
+            var ballAnimation = new BallAppearAnimation(ellipse, FieldSettings.CellSize* 0.8); 
+            //todo DRY, the CellSize*0.8 was copied from DrawBall method 
+            _animationController.AddAnimation(ballAnimation);
+            animationsStarted = true;
+        }
+
+        if (onAllAnimationsFinished != null)
+        {
+            if (animationsStarted)
             {
-                var ballAnimation = new BallAppearAnimation(ellipse, FieldSettings.CellSize* 0.8); 
-                //todo DRY, the CellSize*0.8 was copied from DrawBall method 
-                _animationController.AddAnimation(ballAnimation);
+                _animationController.AllAnimationsFinished += onAllAnimationsFinished;
+            }
+            else
+            {
+                onAllAnimationsFinished.Invoke(null, EventArgs.Empty);
             }
         }
-            
-        _animationController.Tick();
+
+        _animationController.Tick(); //todo smelly
     }
         
         
-    public void StartBallDisappearAnimation(IEnumerable<ShapeBall> balls, Action<Animation>? onAnimationFinished)
+    public void StartBallDisappearAnimation(
+        IEnumerable<ShapeBall> balls, 
+        EventHandler<EventArgs>? onAllAnimationsFinished)
     {
+        bool animationsStarted = false;
+        
         foreach (var ball in balls)
         {
-            if (ball.Shape is Ellipse ellipse)
-            {
-                var ballAnimation = new BallDisappearAnimation(ellipse, FieldSettings.CellSize* 0.8); 
-                //todo DRY, the CellSize*0.8 was copied from DrawBall method 
+            if (ball.Shape is not Ellipse ellipse) continue;
+            
+            var ballAnimation = new BallDisappearAnimation(ellipse, FieldSettings.CellSize* 0.8); 
+            //todo DRY, the CellSize*0.8 was copied from DrawBall method 
 
-                if (onAnimationFinished != null)
-                {
-                    EventHandler<AnimationFinishedEventArgs> animationFinishedHandler = (object? sender, AnimationFinishedEventArgs args) =>
-                    {
-                        onAnimationFinished?.Invoke(ballAnimation);
-                    };
-                    ballAnimation.AnimationFinished += animationFinishedHandler;
-                }
-                _animationController.AddAnimation(ballAnimation);
+            _animationController.AddAnimation(ballAnimation);
+            animationsStarted = true;
+        }
+
+        if (onAllAnimationsFinished != null)
+        {
+            if (animationsStarted)
+            {
+                _animationController.AllAnimationsFinished += onAllAnimationsFinished;
+            }
+            else
+            {
+                onAllAnimationsFinished.Invoke(null, EventArgs.Empty);
             }
         }
     }

@@ -15,7 +15,7 @@ public class PathfinderDataDrivenTest
 
     private readonly Pathfinder _pathfinder;
     
-    private readonly int[,] _field = new int[,]
+    private readonly int[,] _field = 
     { 
         //0  1  2  3  4  5  6
         { 1, 0, 0, 1, 0, 0, 0 }, // x == 0
@@ -53,6 +53,6 @@ public class PathfinderDataDrivenTest
             {
                 (2, 6), (1, 6), (0, 6), (0, 5), (0, 4), (1, 4), (2, 4), (3, 4), (3, 3), (3, 2),
                 (3, 0), (2, 0), (1, 0), (1, 1), (1, 2), (0, 1), (0, 2)
-            } },
+            } }
         };
 }
