@@ -54,7 +54,7 @@ public class Game
     {
         ValidateGameState(new []{GameState.WaitingForSelection, GameState.BallSelected});
 
-        if (Field.GetBall(xy) != null)
+        if (Field.IsWithinBounds(xy) && Field.GetBall(xy) != null)
         {
             ChangeSelectedBallCell(xy);
             GameState = GameState.BallSelected;
@@ -70,9 +70,23 @@ public class Game
         {
             return false;
         }
+
+        if (Field.GetBall(from) == null || Field.GetBall(to) != null)
+        {
+            return false;
+        }
         
-        //todo check via PathFinder
-        return Field.GetBall(from) != null && Field.GetBall(to) == null;
+        var field = new bool[Field.Width, Field.Height];
+        
+        for (var x = 0; x <= field.GetUpperBound(0); x++)
+        for (var y = 0; y <= field.GetUpperBound(1); y++)
+        {
+            field[x, y] = Field.GetBall(new Location(x, y)) != null;
+        }
+
+        var pathFinder = new Pathfinder(field);
+
+        return pathFinder.CanMove((from.X, from.Y), (to.X, to.Y));
     }
     
     public bool CanMove(Location xy)
@@ -90,7 +104,7 @@ public class Game
 
         if (SelectedBall == null) throw new Exception("Ball is not selected");
 
-        if (Field.GetBall(whereToMove) != null) //todo check CanMove via PathFinder
+        if (!CanMove(whereToMove))
         {
             return false;
         }
