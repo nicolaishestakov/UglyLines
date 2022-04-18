@@ -32,5 +32,5 @@ public abstract class Animation
         }
     }
     
-    public event EventHandler<AnimationFinishedEventArgs> AnimationFinished;
+    public event EventHandler<AnimationFinishedEventArgs>? AnimationFinished;
 }

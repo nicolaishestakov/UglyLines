@@ -48,6 +48,23 @@ public class Field
         }
     }
 
+    public IEnumerable<Location> GetEmptyCells()
+    {
+        var w = Width;
+        var h = Height;
+        
+        for (var x = 0; x < w; x++)
+        for (var y = 0; y < h; y++)
+        {
+            var location = new Location(x, y);
+            var ball = GetBall(location);
+            if (ball == null)
+            {
+                yield return location;
+            }
+        }
+    }
+
     public event EventHandler<BallAddedEventArgs>? BallAdded;
 
     public event EventHandler<BallMovedEventArgs>? BallMoved;
@@ -106,5 +123,26 @@ public class Field
         }
         
         BallsRemoved?.Invoke(this, new BallsRemovedEventArgs(balls));
+    }
+
+    public void RemoveBalls(IEnumerable<Location> locationsToClear)
+    {
+        var balls = new List<BallXY>();
+        
+        foreach (var location in locationsToClear)
+        {
+            var ball = GetBall(location);
+            
+            if (ball != null)
+            {
+                balls.Add(new BallXY(ball, location));
+                _cells[location.X, location.Y] = null;
+            }
+        }
+
+        if (balls.Any())
+        {
+            BallsRemoved?.Invoke(this, new BallsRemovedEventArgs(balls));
+        }
     }
 }

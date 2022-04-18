@@ -51,11 +51,11 @@ public class AnimationController
         }
     }
     
-    public event EventHandler<AnimationFinishedEventArgs> AnimationFinished;
+    public event EventHandler<AnimationFinishedEventArgs>? AnimationFinished;
 
-    public event EventHandler<EventArgs> AllAnimationsFinished;
+    public event EventHandler<EventArgs>? AllAnimationsFinished;
 
-    public event EventHandler<EventArgs> FirstAnimationStarted;
+    public event EventHandler<EventArgs>? FirstAnimationStarted;
 }
 
 public class AnimationFinishedEventArgs: EventArgs

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Threading;
@@ -31,23 +32,14 @@ namespace UglyLines.Desktop.ViewModels
             };
         }
         
-        public GamePresenter GamePresenter { get; private set; } = new GamePresenter(new FieldSettings
-            {
-                LeftMargin = 30,
-                TopMargin = 80,
-                CellSize = 40,
-                Width = 9, //todo DRY
-                Height = 9
-
-            },
-            9, 9); //todo DRY
+        public GamePresenter? GamePresenter { get; private set; }
 
         private DispatcherTimer _animationTimer = new DispatcherTimer {Interval = TimeSpan.FromMilliseconds(100)};
         //todo the timer is Avalonia dependency, some cross-platform abstraction is needed here
         
         private AnimationController _animationController = new ();
         
-        public void StartGame()
+        public void StartGame(Canvas canvas)
         {
             GamePresenter = new GamePresenter(new FieldSettings
                 {
@@ -58,107 +50,53 @@ namespace UglyLines.Desktop.ViewModels
                     Height = 9
 
                 },
-                9, 9); //todo DRY
-        }
-
-        public void StartBallAppearAnimation(IEnumerable<Shape> balls)
-        {
-            foreach (var ball in balls)
-            {
-                if (ball is Ellipse ellipse)
-                {
-                    var ballAnimation = new BallAppearAnimation(ellipse, GamePresenter.FieldSettings.CellSize* 0.8); 
-                        //todo DRY, the CellSize*0.8 was copied from DrawBall method 
-                    _animationController.AddAnimation(ballAnimation);
-                }
-            }
+                9, 9, //todo DRY 
+                _animationController,
+                canvas);
             
-            _animationController.Tick();
-        }
-        
-        
-        public void StartBallDisappearAnimation(IEnumerable<Shape> balls, Action<Animation>? onAnimationFinished)
-        {
-            foreach (var ball in balls)
-            {
-                if (ball is Ellipse ellipse)
-                {
-                    var ballAnimation = new BallDisappearAnimation(ellipse, GamePresenter.FieldSettings.CellSize* 0.8); 
-                    //todo DRY, the CellSize*0.8 was copied from DrawBall method 
-
-                    if (onAnimationFinished != null)
-                    {
-                        EventHandler<AnimationFinishedEventArgs> animationFinishedHandler = (object? sender, AnimationFinishedEventArgs args) =>
-                        {
-                            onAnimationFinished?.Invoke(ballAnimation);
-                        };
-                        ballAnimation.AnimationFinished += animationFinishedHandler;
-                    }
-                    _animationController.AddAnimation(ballAnimation);
-                }
-            }
+            GamePresenter.Restart();
         }
         
         public void FieldCellClick(int x, int y)
         {
-            if (GamePresenter.State == GameState.WaitingForSelection && GamePresenter.IsWithinField(x, y))
+            if (GamePresenter == null)
             {
-                try
-                {
-                    var ball = GamePresenter.SelectBall(x, y);
-                    (ball as Ellipse).Stroke = new SolidColorBrush(Color.Parse("Black"));
-                    (ball as Ellipse).StrokeThickness = 4;
-                }
-                catch
-                {
-                }
+                throw new Exception("Not initialized");
             }
             
-            if (GamePresenter.State == GameState.BallSelected)
+            if (GamePresenter.State == GameState.WaitingForSelection)
             {
-                if (GamePresenter.CanMoveTo(x, y))
+                GamePresenter.SelectBall(x, y);
+            }
+            else if (GamePresenter.State == GameState.BallSelected)
+            {
+                if (!GamePresenter.SelectBall(x, y))
                 {
                     GamePresenter.StartMakingMove(x, y);
                 }
-                else if (GamePresenter.IsWithinField(x, y) && GamePresenter.Field[x, y] != null)
-                {
-                    //select another ball
-                    try
-                    {
-                        var selectedBall = GamePresenter.SelectedBall;
-                        
-                        var ball = GamePresenter.SelectBall(x, y); //todo duplicate code
-                        (ball as Ellipse).Stroke = new SolidColorBrush(Color.Parse("Black"));
-                        (ball as Ellipse).StrokeThickness = 4;
-
-                        if (selectedBall != null && selectedBall != GamePresenter.SelectedBall)
-                        {
-                            (selectedBall as Ellipse).StrokeThickness = 0;
-                        }
-                    }
-                    catch
-                    {
-                    }
-                }
             }
         }
-        
-        private (int x, int y) GetRandomCell(bool shouldBeEmpty)
+
+        public void AutoMove()
         {
+            var cellTo = GetRandomEmptyCell();
+            var cellFrom =GetRandomBallCellThatCanMoveTo(cellTo);
+                
+            FieldCellClick(cellFrom.X, cellFrom.Y);
+            FieldCellClick(cellTo.X, cellTo.Y);
+        }
+        
+        private Logic.Location GetRandomCell(bool shouldBeEmpty)
+        {
+            if (GamePresenter == null)
+            {
+                throw new Exception("Not initialized");
+            }
+            
             var rnd = new Random();
             
-            var cells = new List<(int x, int y)>();
+            var cells = GamePresenter.Game.Field.GetEmptyCells().ToList();
             
-            for (var x = 0; x < GamePresenter.FieldWidth; x++)
-            for (var y = 0; y < GamePresenter.FieldHeight; y++)
-            {
-                if ((shouldBeEmpty && GamePresenter.Field[x, y] == null) ||
-                    (!shouldBeEmpty && GamePresenter.Field[x, y] != null))
-                {
-                    cells.Add((x, y));
-                }
-            }
-
             if (!cells.Any())
             {
                 throw new Exception("No appropriate cell in the field");
@@ -167,12 +105,17 @@ namespace UglyLines.Desktop.ViewModels
             return cells[rnd.Next(0, cells.Count)];
         }
 
-        public (int x, int y) GetRandomBallCellThatCanMoveTo(int toX, int toY)
+        private Logic.Location GetRandomBallCellThatCanMoveTo(Logic.Location to)
         {
+            if (GamePresenter == null)
+            {
+                throw new Exception("Not initialized");
+            }
+            
             for (var i = 0; i < 1000; i++)
             {
                 var ballCell = GetRandomCell(false);
-                if (GamePresenter.CanMoveTo(ballCell.x, ballCell.y, toX, toY))
+                if (GamePresenter.Game.CanMove(ballCell, to))
                 {
                     return ballCell;
                 }
@@ -182,16 +125,16 @@ namespace UglyLines.Desktop.ViewModels
             for (var x = 0; x < GamePresenter.FieldWidth; x++)
             for (var y = 0; y < GamePresenter.FieldHeight; y++)
             {
-                if (GamePresenter.CanMoveTo(x, y, toX, toY))
+                if (GamePresenter.Game.CanMove(new Logic.Location(x, y), to))
                 {
-                    return (x, y);
+                    return new Logic.Location(x, y);
                 }
             }
 
             throw new Exception("No move available");
         }
         
-        public (int x, int y) GetRandomEmptyCell()
+        public Logic.Location GetRandomEmptyCell()
         {
             return GetRandomCell(true);
         }

@@ -126,75 +126,9 @@ namespace UglyLines.Desktop.Views
             }
         }
 
-        private void OnFieldClick(int x, int y)
-        {
-            MainViewModel.FieldCellClick(x, y);
-
-            var game = MainViewModel.GamePresenter; 
-            
-            if (game.State == GameState.BallMoving)
-            {
-                game.MovingBall.StrokeThickness = 0; //remove selection
-                //todo implement animation in UI
-                game.EndMakingMove();
-                
-                UpdateBallPositions();
-            }
-
-            if (game.State == GameState.ClearLines)
-            {
-                var b1 = DrawBall(0, 0, game.GetNextBallColor()); //todo note that DrawBall needs coordinates
-                var b2 = DrawBall(0, 0, game.GetNextBallColor()); // though the actual coordinates will be set by game logic later
-                var b3 = DrawBall(0, 0, game.GetNextBallColor()); // if Game for some reason does not do that, the ball shape will
-                                                                           // be drawn in the top-left corner, while logically it
-                                                                           // will not exist in the field
-
-                var shapesToRemove = game.BallsToClear.Select(b => game.Field[b.x, b.y]).ToList();
-                
-                MainViewModel.StartBallDisappearAnimation(shapesToRemove, (Animation animation) =>
-                {
-                    if (animation is BallDisappearAnimation bda)
-                    {
-                        _fieldCanvas.Children.Remove(bda.Ball);
-                    }
-                });
-                
-                game.ClearLinesAndPrepareNewBallsToShoot(new[] { b1, b2, b3 });
-
-                // Not all of the balls b1, b2, b3 might have been added because of completed lines or no space
-                // check which balls are in the BallsToShoot and remove unused
-                if (!game.BallsToShoot.Any(b => b.ball == b1))
-                {
-                    _fieldCanvas.Children.Remove(b1);
-                }
-                if (!game.BallsToShoot.Any(b => b.ball == b2))
-                {
-                    _fieldCanvas.Children.Remove(b2);
-                }
-                if (!game.BallsToShoot.Any(b => b.ball == b3))
-                {
-                    _fieldCanvas.Children.Remove(b3);
-                }
-                //todo the code above is a clear code smell.
-                //  1) it looks like it's copy-pasted 3 times for 3 variables (minor issue)
-                //  2) the logic of adding balls is scattered, it has 2 disjoint parts in this method,
-                //     and there is an assumption about what should be happening in ClearLinesAndPrepareNewBallsToShoot
-                
-                
-                if (game.State == GameState.ShootNewBalls)
-                {
-                    MainViewModel.StartBallAppearAnimation(game.BallsToShoot.Select(b => b.ball));
-                    
-                    game.ApplyNewBallsAndProceedToNewMoveOrEndGame();
-                }
-                
-                UpdateBallPositions();
-            }
-        }
-        
         private void GameField_OnPointerPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (MainViewModel.GamePresenter.State == GameState.GameOver)
+            if (MainViewModel.GamePresenter != null && MainViewModel.GamePresenter.State == GameState.GameOver)
             {
                 return;
             }
@@ -203,12 +137,13 @@ namespace UglyLines.Desktop.Views
             int x = (int)Math.Floor((p.Position.X - _fieldSettings.LeftMargin) / _fieldSettings.CellSize);
             int y = (int)Math.Floor((p.Position.Y - _fieldSettings.TopMargin) / _fieldSettings.CellSize);
 
-            OnFieldClick(x, y);
+            MainViewModel.FieldCellClick(x, y);
         }
 
 
         private void ReloadButton_OnClick(object? sender, RoutedEventArgs e)
         {
+            //todo this might be unnecessary
             var shapesToRemove = new List<Ellipse>();
             
             foreach (var control in _fieldCanvas.Children)
@@ -220,42 +155,9 @@ namespace UglyLines.Desktop.Views
             }
 
             _fieldCanvas.Children.RemoveAll(shapesToRemove);
-            
-            //var game = MainViewModel.Game;
-            
-            MainViewModel.StartGame();
-
-            var game = MainViewModel.GamePresenter;
-
-            var b1 = DrawBall(0, 0, game.GetNextBallColor()); //todo DRY
-            var b2 = DrawBall(0, 0, game.GetNextBallColor());
-            var b3 = DrawBall(0, 0, game.GetNextBallColor());
-
-            game.ClearLinesAndPrepareNewBallsToShoot(new[] { b1, b2, b3 });
-            game.ApplyNewBallsAndProceedToNewMoveOrEndGame();
-
-            UpdateBallPositions();
+           
+            MainViewModel.StartGame(_fieldCanvas);
         }
-
-        private void UpdateBallPositions()
-        {
-            var game = MainViewModel.GamePresenter;
-            
-            for (var x  = 0; x<=game.Field.GetUpperBound(0); x++)
-            for (var y = 0; y <= game.Field.GetUpperBound(1); y++)
-            {
-                var shape = game.Field[x, y]; 
-                if (shape != null)
-                {
-                    var screenX = _fieldSettings.LeftMargin + _fieldSettings.CellSize * x + 4;
-                    var screenY = _fieldSettings.TopMargin + _fieldSettings.CellSize * y + 4;
-                    
-                    Canvas.SetLeft(shape, screenX);
-                    Canvas.SetTop(shape, screenY);
-                }
-            }
-        }
-
 
         private void StyledElement_OnDataContextChanged(object? sender, EventArgs e)
         {
@@ -267,13 +169,9 @@ namespace UglyLines.Desktop.Views
         {
             try
             {
-                var cellTo = MainViewModel.GetRandomEmptyCell();
-                var cellFrom = MainViewModel.GetRandomBallCellThatCanMoveTo(cellTo.x, cellTo.y);
-                
-                OnFieldClick(cellFrom.x, cellFrom.y);
-                OnFieldClick(cellTo.x, cellTo.y);
+                MainViewModel.AutoMove();
             }
-            catch (Exception exception)
+            catch
             {
                 // can't move
             }

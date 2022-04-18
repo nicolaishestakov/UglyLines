@@ -5,7 +5,7 @@ public enum GameState
     WaitingForSelection,
     BallSelected,
     BallMoving,
-    ClearLines,
-    ShootNewBalls,
+    ClearingLines,
+    ShootingNewBalls,
     GameOver
 }
