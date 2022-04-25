@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace UglyLines.Desktop.Logic;
+﻿namespace UglyLines.Logic;
 
 public class BallMovedEventArgs: EventArgs
 {

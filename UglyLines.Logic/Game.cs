@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace UglyLines.Desktop.Logic;
+﻿namespace UglyLines.Logic;
 /*
     [WaitingForSelection] The balls marked to clear are removed from the field
             |    

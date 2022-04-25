@@ -2,7 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
-using UglyLines.Desktop.Logic;
+using UglyLines.Logic;
 
 namespace UglyLines.Desktop.ViewModels;
 

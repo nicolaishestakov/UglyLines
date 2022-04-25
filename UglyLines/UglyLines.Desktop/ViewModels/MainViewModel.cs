@@ -5,8 +5,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Threading;
-using UglyLines.Desktop.Logic;
 using UglyLines.Desktop.Views;
+using UglyLines.Logic;
 
 namespace UglyLines.Desktop.ViewModels
 {

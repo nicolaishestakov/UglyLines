@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
-using UglyLines.Desktop.Logic;
+using UglyLines.Logic;
 using Xunit;
 
 namespace UglyLines.Tests;

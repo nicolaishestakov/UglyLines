@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace UglyLines.Desktop.Logic;
+﻿namespace UglyLines.Logic;
 
 public class BallsRemovedEventArgs
 {

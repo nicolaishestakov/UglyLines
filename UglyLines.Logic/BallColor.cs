@@ -1,4 +1,4 @@
-﻿namespace UglyLines.Desktop.Logic;
+﻿namespace UglyLines.Logic;
 
 public enum BallColor
 {

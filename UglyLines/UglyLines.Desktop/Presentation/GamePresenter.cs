@@ -4,8 +4,8 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using UglyLines.Desktop.Views;
-using UglyLines.Desktop.Logic;
-using Location = UglyLines.Desktop.Logic.Location;
+using UglyLines.Logic;
+using Location = UglyLines.Logic.Location;
 
 namespace UglyLines.Desktop.ViewModels;
 

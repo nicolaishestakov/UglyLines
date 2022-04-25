@@ -1,6 +1,6 @@
 ﻿using System;
 using FluentAssertions;
-using UglyLines.Desktop.Logic;
+using UglyLines.Logic;
 using Xunit;
 
 namespace UglyLines.Tests;

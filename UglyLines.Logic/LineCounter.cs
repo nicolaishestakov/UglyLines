@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace UglyLines.Desktop.Logic;
+﻿namespace UglyLines.Logic;
 
 public interface IColorField
 {

@@ -9,8 +9,8 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
-using UglyLines.Desktop.Logic;
 using UglyLines.Desktop.ViewModels;
+using UglyLines.Logic;
 
 namespace UglyLines.Desktop.Views
 {

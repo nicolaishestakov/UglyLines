@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UglyLines.NetCore", "UglyLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UglyLines.Tests", "UglyLines.Tests\UglyLines.Tests.csproj", "{E0B668A6-571E-4839-A808-67451CF71C9A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UglyLines.Logic", "UglyLines.Logic\UglyLines.Logic.csproj", "{FC36E8DF-59D6-4198-827A-85496DE23B58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{E0B668A6-571E-4839-A808-67451CF71C9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0B668A6-571E-4839-A808-67451CF71C9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0B668A6-571E-4839-A808-67451CF71C9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC36E8DF-59D6-4198-827A-85496DE23B58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC36E8DF-59D6-4198-827A-85496DE23B58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC36E8DF-59D6-4198-827A-85496DE23B58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC36E8DF-59D6-4198-827A-85496DE23B58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
