@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UglyLines.Tests", "UglyLine
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UglyLines.Logic", "UglyLines.Logic\UglyLines.Logic.csproj", "{FC36E8DF-59D6-4198-827A-85496DE23B58}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UglyLines.Console", "UglyLines.Console\UglyLines.Console.csproj", "{05097A67-4B96-41C4-A971-F923FC8F095E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{FC36E8DF-59D6-4198-827A-85496DE23B58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC36E8DF-59D6-4198-827A-85496DE23B58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC36E8DF-59D6-4198-827A-85496DE23B58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05097A67-4B96-41C4-A971-F923FC8F095E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05097A67-4B96-41C4-A971-F923FC8F095E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05097A67-4B96-41C4-A971-F923FC8F095E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05097A67-4B96-41C4-A971-F923FC8F095E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
