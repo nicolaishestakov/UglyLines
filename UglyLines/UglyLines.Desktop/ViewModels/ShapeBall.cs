@@ -98,7 +98,7 @@ public class ShapeBall: IBall
         return BallColors[ballColor];
     }
 
-    private static readonly Dictionary<BallColor, Color> BallColors = new Dictionary<BallColor, Color>()
+    private static readonly Dictionary<BallColor, Color> BallColors = new()
     {
         { BallColor.Red, Avalonia.Media.Color.Parse("Red") },
         { BallColor.Blue, Avalonia.Media.Color.Parse("Blue") },

@@ -207,22 +207,12 @@ public class GamePresenter
         Game.FinishMove();
     }
 
-    private static readonly BallColor[] BallColors = Enum.GetValues<BallColor>();
-    
-    public BallColor GetNextBallColor()
-    {
-        var random = new Random();
-        var colorIndex = random.Next(BallColors.GetLowerBound(0), BallColors.GetUpperBound(0) +1);
-
-        return BallColors[colorIndex];
-    }
-
     private IEnumerable<IBall> GetNextBalls()
     {
         //todo ball generation can be delegated into logic layer
-        var b1 = new ShapeBall(GetNextBallColor(), FieldSettings.CellSize);
-        var b2 = new ShapeBall(GetNextBallColor(), FieldSettings.CellSize);
-        var b3 = new ShapeBall(GetNextBallColor(), FieldSettings.CellSize);
+        var b1 = new ShapeBall(BallHelper.GetRandomBallColor(), FieldSettings.CellSize);
+        var b2 = new ShapeBall(BallHelper.GetRandomBallColor(), FieldSettings.CellSize);
+        var b3 = new ShapeBall(BallHelper.GetRandomBallColor(), FieldSettings.CellSize);
 
         return new[] { b1, b2, b3 };
     }

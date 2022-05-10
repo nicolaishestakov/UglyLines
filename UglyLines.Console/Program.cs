@@ -11,29 +11,13 @@
 
 using UglyLines.Logic;
 
-Console.WriteLine("Hello, World!");
-var random = new Random();
-BallColor[] BallColors = Enum.GetValues<BallColor>();
-
-
 var game = new Game(9, 9);
-game.Restart(
-    new[]
-    {
-        GetRandomBall(random),  //todo extract GetNextBalls method
-        GetRandomBall(random),
-        GetRandomBall(random)
-    });
+game.Restart(GetNextBalls());
 
 //Restart shoots the balls and lets the presenter do the animation
 //So it is required to finish the shooting and move to next turn
 game.FinishShootingBalls();
-game.NextMoveOrEndGame(new[]
-{
-    GetRandomBall(random),
-    GetRandomBall(random),
-    GetRandomBall(random)
-});
+game.NextMoveOrEndGame(GetNextBalls());
 
 
 while (true)
@@ -56,7 +40,7 @@ while (true)
             throw new Exception("Unrecognized command");
         }
 
-        MakeMove(game, move.Value.from, move.Value.to, random);
+        MakeMove(game, move.Value.from, move.Value.to);
     }
     catch (Exception e)
     {
@@ -70,7 +54,6 @@ while (true)
     }
 }
 
-Console.ReadLine();
 
 
 // functions
@@ -95,12 +78,29 @@ Console.ReadLine();
 
 void PrintBall(IBall ball)
 {
+    var oldColor = Console.BackgroundColor;
+
+    Console.BackgroundColor = ball.Color switch
+    {
+        BallColor.Blue => ConsoleColor.Blue,
+        BallColor.Brown => ConsoleColor.DarkYellow,
+        BallColor.Cyan => ConsoleColor.Cyan,
+        BallColor.Green => ConsoleColor.Green,
+        BallColor.Magenta => ConsoleColor.Magenta,
+        BallColor.Red => ConsoleColor.Red,
+        BallColor.Yellow => ConsoleColor.Yellow,
+        _ => oldColor
+    };
+
     Console.Write((int)ball.Color);
+    Console.Write(" ");
+
+    Console.BackgroundColor = oldColor;
 }
 
 void PrintField(Field field, IEnumerable<IBall> nextBalls)
 {
-    Console.Write("  012345678   -> "); //todo adjust for different field width
+    Console.Write("  0 1 2 3 4 5 6 7 8   -> "); //todo adjust for different field width
 
     foreach (var ball in nextBalls)
     {
@@ -118,20 +118,19 @@ void PrintField(Field field, IEnumerable<IBall> nextBalls)
 
             if (ball == null)
             {
-                Console.Write('.');
+                Console.Write(". ");
             }
             else
             {
                 PrintBall(ball);
             }
         }
-        Console.WriteLine();
+        Console.WriteLine($" {y.ToString()[0]}");
     }
-    
-    Console.WriteLine();
+    Console.WriteLine("  0 1 2 3 4 5 6 7 8");
 }
 
-void MakeMove(Game game, Location from, Location to, Random random)
+void MakeMove(Game game, Location from, Location to)
 {
     if (!game.SelectBall(from))
     {
@@ -146,24 +145,20 @@ void MakeMove(Game game, Location from, Location to, Random random)
         game.FinishShootingBalls();
     }
 
-    game.NextMoveOrEndGame(new[]
-    {
-        GetRandomBall(random),
-        GetRandomBall(random),
-        GetRandomBall(random)
-    });
-
+    game.NextMoveOrEndGame(GetNextBalls());
 }
 
 
-
-
-IBall GetRandomBall(Random random)
+IEnumerable<IBall> GetNextBalls()
 {
-    //todo DRY, similar code in GamePresenter
-    var colorIndex = random.Next(BallColors.GetLowerBound(0), BallColors.GetUpperBound(0) +1);
+    yield return GetRandomBall();
+    yield return GetRandomBall();
+    yield return GetRandomBall();
+}
 
-    return new Ball() { Color = BallColors[colorIndex] };
+IBall GetRandomBall()
+{
+    return new Ball() { Color = BallHelper.GetRandomBallColor() };
 }
 
 class Ball : IBall
