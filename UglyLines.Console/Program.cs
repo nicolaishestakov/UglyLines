@@ -23,16 +23,10 @@ game.Restart(
         GetRandomBall(random),  //todo extract GetNextBalls method
         GetRandomBall(random),
         GetRandomBall(random)
-    },
-    new[]
-    {
-        GetRandomBall(random),
-        GetRandomBall(random),
-        GetRandomBall(random)
     });
 
-//todo we have to do this due to a bug
-//todo fix the bug
+//Restart shoots the balls and lets the presenter do the animation
+//So it is required to finish the shooting and move to next turn
 game.FinishShootingBalls();
 game.NextMoveOrEndGame(new[]
 {
@@ -55,7 +49,7 @@ while (true)
 
     try
     {
-        var move = ParseMoveCommand(command);
+        var move = ParseMoveCommand(command??string.Empty);
 
         if (move == null)
         {
@@ -99,6 +93,10 @@ Console.ReadLine();
     return (new Location(x1, y1), new Location(x2, y2));
 }
 
+void PrintBall(IBall ball)
+{
+    Console.Write((int)ball.Color);
+}
 
 void PrintField(Field field, IEnumerable<IBall> nextBalls)
 {
@@ -106,7 +104,7 @@ void PrintField(Field field, IEnumerable<IBall> nextBalls)
 
     foreach (var ball in nextBalls)
     {
-        Console.Write((int)ball.Color); //todo DRY common method to write out the ball
+        PrintBall(ball);
     }
     Console.WriteLine();
     
@@ -124,7 +122,7 @@ void PrintField(Field field, IEnumerable<IBall> nextBalls)
             }
             else
             {
-                Console.Write((int)ball.Color);
+                PrintBall(ball);
             }
         }
         Console.WriteLine();

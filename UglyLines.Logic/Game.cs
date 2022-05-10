@@ -225,7 +225,7 @@ public class Game
     }
 
 
-    public void Restart(IEnumerable<IBall> ballsOnField, IEnumerable<IBall> nextBalls)
+    public void Restart(IEnumerable<IBall> ballsToShoot)
     {
         Field.Clear();
         _nextBalls.Clear();
@@ -235,7 +235,7 @@ public class Game
 
         _gameState = GameState.BallMoving;
         
-        _nextBalls.AddRange(ballsOnField);
+        _nextBalls.AddRange(ballsToShoot);
         ShootNewBalls();
     }
     

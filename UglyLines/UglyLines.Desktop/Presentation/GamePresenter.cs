@@ -293,6 +293,6 @@ public class GamePresenter
 
     public void Restart()
     {
-        Game.Restart(GetNextBalls(), GetNextBalls());
+        Game.Restart(GetNextBalls());
     }
 }
