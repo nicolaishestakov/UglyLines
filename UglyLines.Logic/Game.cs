@@ -161,24 +161,8 @@ public class Game
         Field.RemoveBalls(_ballsToClear.Select(b => b.Location));
         _ballsToClear.Clear();
 
-        var emptyCells = Field.GetEmptyCells().ToList();
+        _ballsToShoot.AddRange(_nextMoveBalls.ThrowBalls(_nextBalls, Field.GetEmptyCells()));
         
-        var rnd = new Random();
-        
-        foreach (var newBall in _nextBalls)
-        {
-            if (!emptyCells.Any())
-            {
-                break;
-            }
-            
-            var cellIndex = rnd.Next(0, emptyCells.Count - 1);
-                
-            _ballsToShoot.Add(new BallXY(newBall, emptyCells[cellIndex]));
-            
-            emptyCells.RemoveAt(cellIndex);
-        }
-
         GameState = GameState.ShootingNewBalls;
     }
 
@@ -197,7 +181,7 @@ public class Game
         GameState = GameState.ClearingLines;
     }
 
-    public void NextMoveOrEndGame(IEnumerable<IBall> nextBalls)
+    public void NextMoveOrEndGame()
     {
         ValidateGameState(new[] { GameState.ShootingNewBalls, GameState.ClearingLines });
         
@@ -205,7 +189,7 @@ public class Game
         _ballsToClear.Clear();
         
         _nextBalls.Clear();
-        _nextBalls.AddRange(nextBalls);
+        _nextBalls.AddRange(_nextMoveBalls.GetBallsForNextMove());
 
         foreach (var ballXy in BallsToShoot)
         {
@@ -225,7 +209,7 @@ public class Game
     }
 
 
-    public void Restart(IEnumerable<IBall> ballsToShoot)
+    public void Restart()
     {
         Field.Clear();
         _nextBalls.Clear();
@@ -235,7 +219,7 @@ public class Game
 
         _gameState = GameState.BallMoving;
         
-        _nextBalls.AddRange(ballsToShoot);
+        _nextBalls.AddRange(_nextMoveBalls.GetBallsForNextMove());
         ShootNewBalls();
     }
     
@@ -379,8 +363,9 @@ public class Game
         
     }
 
-    public Game(int fieldWidth, int fieldHeight)
+    public Game(int fieldWidth, int fieldHeight, INextMoveBalls nextMoveBalls)
     {
+        _nextMoveBalls = nextMoveBalls;
         Field = new Field(fieldWidth, fieldHeight);
         //_lineCounter = lineCounter;
     }
@@ -392,4 +377,6 @@ public class Game
             throw new Exception("Invalid operation for the game state");
         }
     }
+
+    private INextMoveBalls _nextMoveBalls;
 }

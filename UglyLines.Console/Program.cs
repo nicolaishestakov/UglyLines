@@ -11,13 +11,13 @@
 
 using UglyLines.Logic;
 
-var game = new Game(9, 9);
-game.Restart(GetNextBalls());
+var game = new Game(9, 9, new NextMoveRandomBalls(new BallFactory()));
+game.Restart();
 
 //Restart shoots the balls and lets the presenter do the animation
 //So it is required to finish the shooting and move to next turn
 game.FinishShootingBalls();
-game.NextMoveOrEndGame(GetNextBalls());
+game.NextMoveOrEndGame();
 
 
 while (true)
@@ -145,21 +145,9 @@ void MakeMove(Game game, Location from, Location to)
         game.FinishShootingBalls();
     }
 
-    game.NextMoveOrEndGame(GetNextBalls());
+    game.NextMoveOrEndGame();
 }
 
-
-IEnumerable<IBall> GetNextBalls()
-{
-    yield return GetRandomBall();
-    yield return GetRandomBall();
-    yield return GetRandomBall();
-}
-
-IBall GetRandomBall()
-{
-    return new Ball() { Color = BallHelper.GetRandomBallColor() };
-}
 
 class Ball : IBall
 {

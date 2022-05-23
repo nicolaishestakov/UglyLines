@@ -25,7 +25,7 @@ public class GamePresenter
         _animationController = animationController;
         _canvas = canvas;
 
-        Game = new Game(fieldWidth, fieldHeight);
+        Game = new Game(fieldWidth, fieldHeight, new NextMoveRandomBalls(new ShapeBallFactory(FieldSettings.CellSize)));
         Game.GameStateChanged += OnGameStateChanged;
         Game.Field.BallAdded += FieldOnBallAdded;
         Game.Field.BallMoved += FieldOnBallMoved;
@@ -174,7 +174,7 @@ public class GamePresenter
 
         void AfterAnimationContinuation()
         {
-            Game.NextMoveOrEndGame(GetNextBalls());
+            Game.NextMoveOrEndGame();
         }
     }
 
@@ -207,16 +207,7 @@ public class GamePresenter
         Game.FinishMove();
     }
 
-    private IEnumerable<IBall> GetNextBalls()
-    {
-        //todo ball generation can be delegated into logic layer
-        var b1 = new ShapeBall(BallHelper.GetRandomBallColor(), FieldSettings.CellSize);
-        var b2 = new ShapeBall(BallHelper.GetRandomBallColor(), FieldSettings.CellSize);
-        var b3 = new ShapeBall(BallHelper.GetRandomBallColor(), FieldSettings.CellSize);
-
-        return new[] { b1, b2, b3 };
-    }
-    
+   
     // Animations
 
     private AnimationController _animationController;
@@ -283,6 +274,6 @@ public class GamePresenter
 
     public void Restart()
     {
-        Game.Restart(GetNextBalls());
+        Game.Restart();
     }
 }
