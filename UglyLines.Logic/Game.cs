@@ -93,7 +93,7 @@ public class Game
 
         if (from == null) return false;
 
-        return CanMove(from.Value, xy);
+        return CanMove(from, xy);
     }
     
     public bool StartMove(Location whereToMove)
@@ -271,9 +271,9 @@ public class Game
                 return null;
             }
 
-            var ball = Field.GetBall(_selectedBallCell.Value);
+            var ball = Field.GetBall(_selectedBallCell);
 
-            return ball == null ? null : new BallXY(ball, _selectedBallCell.Value);
+            return ball == null ? null : new BallXY(ball, _selectedBallCell);
         }
     }
 
@@ -301,7 +301,7 @@ public class Game
             return;
         }
         
-        var ball = Field.GetBall(newSelection.Value);
+        var ball = Field.GetBall(newSelection);
         if (ball == null)
         {
             throw new ArgumentException($"{nameof(newSelection)} location contains no ball");
